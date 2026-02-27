@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Lab History | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-microscope"></i> Lab Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create_order.html">Create Order</a></li>
+                <li><a href="upload.html">Upload Report</a></li>
+                <li><a href="pending.html">Pending Labs</a></li>
+                <li><a href="history.html" style="color: var(--primary-color);">Lab History</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('lab_tech');</script>
+
+    <div class="container" style="padding: 2rem 0; max-width: 900px;">
+        <header style="margin-bottom: 2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-clock-rotate-left"
+                            style="color: var(--primary-color);"></i> Lab History</h1>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Archive of all completed &
+                        uploaded test results across patients.</p>
+                </div>
+                <!-- Search bar for specific ID -->
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="history-search" placeholder="Search Patient ID..."
+                        style="padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-surface); color: white;">
+                    <button class="btn-primary"
+                        onclick="loadHistory(document.getElementById('history-search').value)"><i
+                            class="fa-solid fa-magnifying-glass"></i></button>
+                    <button class="btn-primary"
+                        style="background: transparent; color: var(--text-main); border: 1px solid var(--border-color);"
+                        onclick="document.getElementById('history-search').value=''; loadHistory();"><i
+                            class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <div id="history-container" style="display: grid; gap: 1rem;">
+            <p style="text-align: center; color: var(--text-muted); padding: 3rem;"><i
+                    class="fa-solid fa-spinner fa-spin"></i> Loading historical archive...</p>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+
+        async function loadHistory(searchQuery = '') {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 3rem;"><i class="fa-solid fa-spinner fa-spin"></i> Loading historical archive...</p>';
+
+            try {
+                const res = await fetch(`${API_URL}/lab/orders`);
+                const orders = await res.json();
+
+                let completed = orders.filter(o => o.status === 'Completed' || o.file_path);
+
+                if (searchQuery) {
+                    const lowQ = searchQuery.toLowerCase();
+                    completed = completed.filter(o => o.patient_uid.toLowerCase().includes(lowQ) || o.patient_name.toLowerCase().includes(lowQ) || (o.lab_order_id && o.lab_order_id.toLowerCase().includes(lowQ)));
+                }
+
+                if (completed.length === 0) {
+                    container.innerHTML = '<div class="dash-card"><p style="text-align: center; color: var(--text-muted); padding: 2rem;"><i class="fa-solid fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i> No historical records found.</p></div>';
+                    return;
+                }
+
+                container.innerHTML = completed.map(o => `
+                    <div class="dash-card" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--success);">
+                        <div>
+                            ${o.lab_order_id ? `<span style="font-family: monospace; background: rgba(0, 200, 83, 0.1); color: var(--success); padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">${o.lab_order_id}</span>` : `<span style="font-family: monospace; background: rgba(255, 255, 255, 0.1); color: var(--text-muted); padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">AD-HOC UPLOAD</span>`}
+                            
+                            <h3 style="margin: 0.5rem 0 0.2rem 0; color: var(--text-main); font-size: 1.2rem;">${o.report_name}</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;"><i class="fa-regular fa-user"></i> ${o.patient_name} <span style="font-family: monospace; font-size:0.85em; color: var(--primary-color);">(${o.patient_uid})</span></p>
+                            
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-regular fa-calendar-check"></i> Uploaded: ${o.date_uploaded}</span>
+                                ${o.doctor_name ? `<span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-user-doctor"></i> Ref: ${o.doctor_name}</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <a href="../../${o.file_path}" target="_blank" class="btn-primary" style="padding: 0.5rem 1rem; background: var(--primary-color); text-decoration: none;">
+                                <i class="fa-solid fa-file-pdf"></i> View Report
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                container.innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load historical data from server.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => loadHistory());
+    </script>
+</body>
+
+</html>

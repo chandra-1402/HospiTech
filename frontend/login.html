@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Hospitrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="modal-overlay active" style="position: relative; height: 100vh; background: transparent;">
+        <!-- We reuse modal-container for the login card for consistency -->
+        <div class="modal-container" style="opacity: 1; transform: scale(1); max-width: 400px; margin: auto;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <div class="role-icon" style="margin-bottom: 0;">
+                    <i id="role-icon" class="fa-solid fa-user"></i>
+                </div>
+            </div>
+
+            <div class="modal-body" style="padding-top: 0;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h2 id="login-title">Login</h2>
+                    <p id="login-subtitle" style="color: var(--text-secondary);">Please sign in to continue</p>
+                </div>
+
+                <p id="error-message"
+                    style="color: var(--danger); font-size: 0.9rem; margin-bottom: 1rem; text-align: center; display: none;">
+                    Invalid credentials</p>
+                <p id="success-message"
+                    style="color: var(--success); font-size: 0.9rem; margin-bottom: 1rem; text-align: center; display: none;">
+                    Account created! Redirecting...</p>
+
+                <form id="auth-form">
+                    <div id="fullname-group" class="form-group" style="display: none;">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="fullname" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn-primary" id="submit-btn" style="width: 100%;">Sign In</button>
+                </form>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <p id="toggle-text" style="font-size: 0.9rem; cursor: pointer; color: var(--primary-color);"
+                        onclick="toggleMode()">
+                        Don't have an account? <span style="text-decoration: underline;">Create one</span>
+                    </p>
+                    <a href="index.html"
+                        style="font-size: 0.85rem; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Same Script Logic as Before -->
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        let isLogin = true;
+
+        const roleConfig = {
+            'patient': { title: 'Patient Portal', icon: 'fa-user-injured', dashboard: 'patient/index.html' },
+            'hospital_staff': { title: 'Staff Portal', icon: 'fa-hospital-user', dashboard: 'hospital/index.html' },
+            'lab_tech': { title: 'Lab Portal', icon: 'fa-microscope', dashboard: 'labs/index.html' },
+            'admin': { title: 'Admin Portal', icon: 'fa-shield-halved', dashboard: 'admin/index.html' }
+        };
+
+        const config = roleConfig[role] || { title: 'Login', icon: 'fa-user', dashboard: 'index.html' };
+
+        // Init UI
+        document.getElementById('login-title').innerText = config.title;
+        document.getElementById('role-icon').className = `fa-solid ${config.icon}`;
+
+        function toggleMode() {
+            isLogin = !isLogin;
+            const title = document.getElementById('login-title');
+            const subtitle = document.getElementById('login-subtitle');
+            const submitBtn = document.getElementById('submit-btn');
+            const toggleText = document.getElementById('toggle-text');
+            const fullnameGroup = document.getElementById('fullname-group');
+            const errorMsg = document.getElementById('error-message');
+            const successMsg = document.getElementById('success-message');
+
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            if (isLogin) {
+                title.innerText = config.title;
+                subtitle.innerText = "Please sign in to continue";
+                submitBtn.innerText = "Sign In";
+                toggleText.innerHTML = "Don't have an account? <u>Create one</u>";
+                fullnameGroup.style.display = 'none';
+                document.getElementById('fullname').required = false;
+            } else {
+                title.innerText = "Create Account";
+                subtitle.innerText = `Register as a new ${role ? role.replace('_', ' ') : 'User'}`;
+                submitBtn.innerText = "Sign Up";
+                toggleText.innerHTML = "Already have an account? <u>Sign In</u>";
+                fullnameGroup.style.display = 'block';
+                document.getElementById('fullname').required = true;
+            }
+        }
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const fullname = document.getElementById('fullname').value;
+            const errorMsg = document.getElementById('error-message');
+            const successMsg = document.getElementById('success-message');
+
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            const endpoint = isLogin ? '/login' : '/signup';
+            const body = { username, password, role };
+            if (!isLogin) body.full_name = fullname;
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (isLogin) {
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        let redirectUrl = config.dashboard;
+                        if (!role && data.user && data.user.role) {
+                            redirectUrl = roleConfig[data.user.role]?.dashboard || 'index.html';
+                        }
+                        window.location.href = redirectUrl;
+                    } else {
+                        successMsg.innerText = "Account created! Logging you in...";
+                        successMsg.style.display = 'block';
+                        setTimeout(async () => {
+                            const loginResp = await fetch(`${API_URL}/login`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ username, password, role })
+                            });
+                            const loginData = await loginResp.json();
+                            if (loginResp.ok) {
+                                localStorage.setItem('user', JSON.stringify(loginData.user));
+                                let redirectUrl = config.dashboard;
+                                if (!role && loginData.user && loginData.user.role) {
+                                    redirectUrl = roleConfig[loginData.user.role]?.dashboard || 'index.html';
+                                }
+                                window.location.href = redirectUrl;
+                            }
+                        }, 1500);
+                    }
+                } else {
+                    errorMsg.innerText = data.error || 'Authentication failed';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
+                errorMsg.innerText = "Server connection failed";
+                errorMsg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

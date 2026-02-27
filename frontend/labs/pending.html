@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Lab Orders | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-microscope"></i> Lab Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create_order.html">Create Order</a></li>
+                <li><a href="upload.html">Upload Report</a></li>
+                <li><a href="pending.html" style="color: var(--primary-color);">Pending Labs</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('lab_tech');</script>
+
+    <div class="container" style="padding: 2rem 0; max-width: 900px;">
+        <header style="margin-bottom: 2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-list-check"
+                            style="color: var(--primary-color);"></i> Active Lab Queue</h1>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Complete tests and upload
+                        results to fullfill pending orders.</p>
+                </div>
+                <button class="btn-primary" onclick="loadPendingOrders()"><i class="fa-solid fa-rotate-right"></i>
+                    Refresh</button>
+            </div>
+        </header>
+
+        <div id="pending-container" style="display: grid; gap: 1rem;">
+            <p style="text-align: center; color: var(--text-muted); padding: 3rem;"><i
+                    class="fa-solid fa-spinner fa-spin"></i> Loading pending lab orders...</p>
+        </div>
+
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-container" style="max-width: 500px; text-align: center;">
+            <div class="modal-header">
+                <h3>Upload Final Results</h3>
+                <button class="modal-close" onclick="closeModal('upload-modal')">&times;</button>
+            </div>
+
+            <form onsubmit="handleUpload(event)" style="padding: 1.5rem; text-align: left;">
+                <input type="hidden" id="upload-order-id">
+                <input type="hidden" id="upload-patient-id">
+
+                <div
+                    style="background: rgba(0,229,255,0.05); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed var(--primary-color); margin-bottom: 1.5rem;">
+                    <p style="color: var(--primary-color); margin: 0; font-family: monospace; font-size: 1.1rem;"
+                        id="upload-order-text"></p>
+                    <p style="color: var(--text-main); margin: 0.3rem 0 0 0;" id="upload-patient-text"></p>
+                </div>
+
+                <div class="file-drop-area" id="drop-area"
+                    style="padding: 2rem; background: var(--bg-surface); border-radius: 12px; margin-bottom: 1.5rem; cursor: pointer; border: 1px dashed var(--border-color); text-align: center;">
+                    <p style="color: var(--text-muted);">Choose a PDF Result to Attach</p>
+                    <p id="file-name-display" style="margin-top: 0.5rem; font-weight: 600; color: var(--text-main);">
+                    </p>
+                    <input type="file" id="file-input" accept=".pdf" style="display: none;" required
+                        onchange="document.getElementById('file-name-display').innerText = this.files[0].name">
+                </div>
+
+                <script>document.getElementById('drop-area').addEventListener('click', () => document.getElementById('file-input').click());</script>
+
+                <button type="submit" class="btn-primary" style="width: 100%;"><i
+                        class="fa-solid fa-cloud-arrow-up"></i> Fullfill Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        async function loadPendingOrders() {
+            const container = document.getElementById('pending-container');
+
+            try {
+                const res = await fetch(`${API_URL}/lab/orders`);
+                const orders = await res.json();
+
+                const pending = orders.filter(o => o.status === 'Pending');
+
+                if (pending.length === 0) {
+                    container.innerHTML = '<div class="dash-card"><p style="text-align: center; color: var(--success);"><i class="fa-regular fa-face-smile" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i> The lab queue is completely empty!</p></div>';
+                    return;
+                }
+
+                container.innerHTML = pending.map(o => `
+                    <div class="dash-card" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--warning);">
+                        <div>
+                            <span style="font-family: monospace; background: rgba(255, 171, 0, 0.1); color: var(--warning); padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">${o.lab_order_id}</span>
+                            <h3 style="margin: 0.5rem 0 0.2rem 0; color: var(--text-main); font-size: 1.2rem;">${o.report_name}</h3>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">Patient: ${o.patient_name} (${o.patient_uid})</p>
+                            <p style="margin: 0.3rem 0 0 0; color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-user-doctor"></i> Ref: ${o.doctor_name || 'Unknown'}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <button class="btn-primary" style="padding: 0.5rem 1rem;" onclick="openUpload('${o.lab_order_id}', '${o.patient_id}', '${o.patient_name}')">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Result
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                container.innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load server orders</p>';
+            }
+        }
+
+        function openUpload(orderId, patientId, testName) {
+            document.getElementById('upload-order-id').value = orderId;
+            document.getElementById('upload-patient-id').value = patientId;
+            document.getElementById('upload-order-text').innerText = orderId;
+            document.getElementById('upload-patient-text').innerText = testName;
+            document.getElementById('file-name-display').innerText = '';
+            document.getElementById('file-input').value = '';
+            openModal('upload-modal');
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.disabled = true;
+
+            const file = document.getElementById('file-input').files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('lab_order_id', document.getElementById('upload-order-id').value);
+            formData.append('patient_id', document.getElementById('upload-patient-id').value);
+
+            try {
+                const res = await fetch(`${API_URL}/lab/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    alert('Results uploaded successfully! The patient has been notified.');
+                    closeModal('upload-modal');
+                    loadPendingOrders();
+                } else {
+                    const data = await res.json();
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert("Upload failed natively");
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Fullfill Order';
+            btn.disabled = false;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPendingOrders);
+    </script>
+</body>
+
+</html>

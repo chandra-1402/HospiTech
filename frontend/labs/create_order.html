@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Lab Order | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-microscope"></i> Lab Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create_order.html" style="color: var(--primary-color);">Create Order</a></li>
+                <li><a href="upload.html">Upload Report</a></li>
+                <li><a href="pending.html">Pending Labs</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('lab_tech');</script>
+
+    <div class="container" style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+        <header style="margin-bottom: 2rem; text-align: center;">
+            <h1 style="font-size: 2.2rem;"><i class="fa-solid fa-file-signature"></i> Create Lab Order</h1>
+            <p style="color: var(--text-muted);">Generate a tracking barcode (LAB-XXXX) for a new patient test before
+                results arrive.</p>
+        </header>
+
+        <div class="dash-card">
+            <!-- Patient Search -->
+            <div id="search-section"
+                style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px dashed rgba(255,255,255,0.1);">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-main);">1. Identify Patient</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="search-hospitrack-id" placeholder="Enter Hospitrack ID (e.g. HT-ABC123)"
+                        style="flex: 1; padding: 0.8rem; font-size: 1rem;">
+                    <button class="btn-primary" type="button" onclick="searchPatientForOrder()"
+                        style="padding: 0 1.5rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </button>
+                </div>
+                <p id="search-error" style="color: var(--danger); margin-top: 0.8rem; display: none;"></p>
+
+                <div id="patient-profile"
+                    style="display: none; margin-top: 1rem; background: rgba(0,229,255,0.05); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--primary-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <h3 id="profile-name"
+                                style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.3rem;">Patient Name
+                            </h3>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">ID: <span id="profile-id"
+                                    style="font-weight: 600; color: var(--primary-color);">HT-XXXXXX</span></p>
+                        </div>
+                        <button type="button" onclick="resetOrderSearch()"
+                            style="background: transparent; border: none; color: var(--danger); cursor: pointer; text-decoration: underline;">Change
+                            Patient</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cascading Location Selection -->
+            <form id="lab-order-form" style="display: none;" onsubmit="submitLabOrder(event)">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; color: var(--text-main);">2. Routing & Required
+                    Test</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label>City / Region</label>
+                        <select id="sel-city" required style="width: 100%; padding: 0.8rem; background: var(--bg-main);"
+                            onchange="filterHospitals()">
+                            <option value="">-- Loading Cities --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hospital Requesting</label>
+                        <select id="sel-hospital" required
+                            style="width: 100%; padding: 0.8rem; background: var(--bg-main);" onchange="filterDoctors()"
+                            disabled>
+                            <option value="">-- Choose City First --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div class="form-group">
+                        <label>Referring Doctor</label>
+                        <select id="sel-doctor" required
+                            style="width: 100%; padding: 0.8rem; background: var(--bg-main);" disabled>
+                            <option value="">-- Choose Hospital First --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Required Test / Report Type</label>
+                        <select id="report-type" required
+                            style="width: 100%; padding: 0.8rem; background: var(--bg-main);">
+                            <optgroup label="Pathology">
+                                <option value="Blood Test (CBC)">Blood Test (CBC)</option>
+                                <option value="Urinalysis">Urinalysis</option>
+                                <option value="Lipid Panel">Lipid Panel</option>
+                                <option value="Covid-19 PCR">Covid-19 PCR</option>
+                                <option value="Blood Culture">Blood Culture</option>
+                            </optgroup>
+                            <optgroup label="Radiology">
+                                <option value="X-Ray (Chest)">X-Ray (Chest)</option>
+                                <option value="MRI Brain">MRI Brain</option>
+                                <option value="CT Scan">CT Scan</option>
+                                <option value="Ultrasound">Ultrasound</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary"
+                    style="width: 100%; padding: 1rem; font-size: 1.1rem; background: var(--success); color: #fff;">
+                    <i class="fa-solid fa-barcode"></i> Generate Lab Order & Tracking ID
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+        let currentPatientId = null;
+        let allHospitals = [];
+
+        // Patient Search
+        async function searchPatientForOrder() {
+            const hid = document.getElementById('search-hospitrack-id').value.trim();
+            const err = document.getElementById('search-error');
+            if (!hid) { err.innerText = "Please enter ID"; err.style.display = 'block'; return; }
+            try {
+                const res = await fetch(`${API_URL}/patient/search?hospitrack_id=${encodeURIComponent(hid)}`);
+                const data = await res.json();
+                if (res.ok) {
+                    currentPatientId = data.id;
+                    document.getElementById('profile-name').innerText = data.full_name || data.username;
+                    document.getElementById('profile-id').innerText = data.hospitrack_id;
+                    document.getElementById('patient-profile').style.display = 'block';
+                    document.getElementById('lab-order-form').style.display = 'block';
+                    err.style.display = 'none';
+                    if (allHospitals.length === 0) loadHospitals();
+                } else {
+                    err.innerText = data.error; err.style.display = 'block';
+                }
+            } catch (e) { err.innerText = "Network error"; err.style.display = 'block'; }
+        }
+
+        function resetOrderSearch() {
+            currentPatientId = null;
+            document.getElementById('patient-profile').style.display = 'none';
+            document.getElementById('lab-order-form').style.display = 'none';
+            document.getElementById('search-hospitrack-id').value = '';
+        }
+
+        // Cascading logic
+        async function loadHospitals() {
+            try {
+                const res = await fetch(`${API_URL}/hospitals`);
+                allHospitals = await res.json();
+
+                // Get unique cities
+                const cities = [...new Set(allHospitals.map(h => h.location.split(',')[0].trim()))].filter(Boolean).sort();
+
+                const citySel = document.getElementById('sel-city');
+                citySel.innerHTML = '<option value="">-- Select City --</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+            } catch (e) { console.error("Error loading hospitals", e); }
+        }
+
+        window.filterHospitals = () => {
+            const city = document.getElementById('sel-city').value;
+            const hospSel = document.getElementById('sel-hospital');
+            const docSel = document.getElementById('sel-doctor');
+
+            if (!city) {
+                hospSel.innerHTML = '<option value="">-- Choose City First --</option>';
+                hospSel.disabled = true;
+                docSel.innerHTML = '<option value="">-- Choose Hospital First --</option>';
+                docSel.disabled = true;
+                return;
+            }
+
+            const filtered = allHospitals.filter(h => h.location.includes(city));
+            hospSel.innerHTML = '<option value="">-- Select Hospital --</option>' + filtered.map(h => `<option value="${h.id}">${h.name}</option>`).join('');
+            hospSel.disabled = false;
+        };
+
+        window.filterDoctors = async () => {
+            const hospId = document.getElementById('sel-hospital').value;
+            const docSel = document.getElementById('sel-doctor');
+
+            if (!hospId) {
+                docSel.innerHTML = '<option value="">-- Choose Hospital First --</option>';
+                docSel.disabled = true;
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/hospital/${hospId}/doctors_list`);
+                const doctors = await res.json();
+
+                if (doctors.length === 0) {
+                    docSel.innerHTML = '<option value="">No doctors rostered here</option>';
+                    docSel.disabled = true;
+                } else {
+                    docSel.innerHTML = '<option value="">-- Select Doctor --</option>' + doctors.map(d => `<option value="${d.name}">${d.name} (${d.specialization})</option>`).join('');
+                    docSel.disabled = false;
+                }
+            } catch (e) { console.error("Error fetching docs", e); }
+        };
+
+        async function submitLabOrder(e) {
+            e.preventDefault();
+            const payload = {
+                patient_id: currentPatientId,
+                hospital_id: document.getElementById('sel-hospital').value,
+                doctor_name: document.getElementById('sel-doctor').value,
+                report_type: document.getElementById('report-type').value
+            };
+
+            e.target.querySelector('button').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+
+            try {
+                const res = await fetch(`${API_URL}/lab/create_order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`Success! Created pending lab order: ${data.lab_order_id}`);
+                    window.location.href = 'pending.html';
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) { alert("Network Error"); }
+
+            e.target.querySelector('button').innerHTML = '<i class="fa-solid fa-barcode"></i> Generate Lab Order & Tracking ID';
+        }
+    </script>
+</body>
+
+</html>

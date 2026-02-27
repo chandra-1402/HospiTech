@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bed Inventory | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="text-decoration:none;">
+                <i class="fa-solid fa-hospital-user"></i> Staff Portal
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="manage_beds.html">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('hospital_staff');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap: 1rem;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);"><i
+                        class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <h1><i class="fa-solid fa-bed" style="color:var(--primary-color);"></i> Bed Inventory</h1>
+                    <p style="color: var(--text-muted);">Manage facility resources and beds.</p>
+                </div>
+            </div>
+            <div id="hospital-name" style="font-size: 1.2rem; font-weight: 700; color: var(--primary-color);"></div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="dash-card" style="grid-column: 1 / -1; border-left: 4px solid var(--primary-color);">
+                <div style="display: flex; gap: 3rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 350px;">
+                        <h4 style="margin-bottom: 1.5rem; color: var(--text-main); font-size: 1.2rem;">Add / Update Bed
+                        </h4>
+                        <form id="bed-form">
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Bed Type</label>
+                                    <select id="bed-type" required style="font-size: 1.1rem; padding: 0.8rem;">
+                                        <option value="General Ward">General Ward</option>
+                                        <option value="ICU">ICU</option>
+                                        <option value="Ventilator">Ventilator</option>
+                                        <option value="Private Room">Private Room</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Price (per day)</label>
+                                    <input type="number" id="bed-price" placeholder="₹" required min="0"
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Total</label>
+                                    <input type="number" id="bed-total" required min="0"
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Available</label>
+                                    <input type="number" id="bed-available" required min="0"
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary"
+                                style="width: 100%; font-size: 1.1rem; padding: 1rem;">Update / Add Bed</button>
+                        </form>
+                    </div>
+
+                    <div style="flex: 2; min-width: 350px;">
+                        <h4
+                            style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--text-main); font-size: 1.2rem;">
+                            Current Inventory</h4>
+                        <div id="bed-list"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                            <p style="color: var(--text-muted); font-size: 1.1rem;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) document.getElementById('hospital-name').innerText = u.username;
+    </script>
+    <script src="../js/hospital_dashboard.js?v=3.0"></script>
+</body>
+
+</html>

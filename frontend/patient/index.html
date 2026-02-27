@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Override specific dashboard styles here if needed, or rely on style.css */
+        .dash-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-user-injured"></i> Patient Portal
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" style="color: var(--primary-color);">Home</a></li>
+                <li><a href="timeline.html">Health Timeline</a></li>
+                <li><a href="#" onclick="openProfileModal()">My Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 2rem 0; padding-bottom: 5rem;">
+
+        <header
+            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <p
+                    style="color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 0.3rem;">
+                    Welcome Back,</p>
+                <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;" id="user-name">Patient</h1>
+                <p style="color: var(--text-muted); font-size: 1rem;">What do you need help with today?</p>
+            </div>
+
+            <!-- Digital Health Card -->
+            <div onclick="showHospitrackID()"
+                style="background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(0, 114, 255, 0.1)); border: 1px solid var(--primary-color); padding: 1rem 1.5rem; border-radius: var(--radius-md); text-align: right; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.1); cursor: pointer; transition: all 0.2s ease;"
+                onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 229, 255, 0.2)';"
+                onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 229, 255, 0.1)';">
+                <p
+                    style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">
+                    Hospitrack ID</p>
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <h2 id="patient-hosp-id"
+                        style="font-family: monospace; font-size: 1.6rem; color: var(--text-main); margin: 0; letter-spacing: 0.1em;">
+                        HT-XXXXXX</h2>
+                    <i class="fa-solid fa-qrcode" style="font-size: 1.8rem; color: var(--primary-color);"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Actions (Mobile Friendly Grid) -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 3rem;">
+            <div class="dash-card" style="text-align: center; cursor: pointer; padding: 1.5rem 1rem;"
+                onclick="document.getElementById('bed-finder').scrollIntoView({behavior: 'smooth'})">
+                <i class="fa-solid fa-bed-pulse"
+                    style="font-size: 2.5rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                <h4 style="font-size: 1.1rem; color: var(--text-main);">Find a Bed</h4>
+            </div>
+            <div class="dash-card" style="text-align: center; cursor: pointer; padding: 1.5rem 1rem;"
+                onclick="openAppointmentModal()">
+                <i class="fa-solid fa-user-doctor"
+                    style="font-size: 2.5rem; color: var(--success); margin-bottom: 1rem;"></i>
+                <h4 style="font-size: 1.1rem; color: var(--text-main);">Book Doctor</h4>
+            </div>
+            <div class="dash-card" style="text-align: center; cursor: pointer; padding: 1.5rem 1rem;"
+                onclick="document.getElementById('health-vault').scrollIntoView({behavior: 'smooth'})">
+                <i class="fa-solid fa-vault"
+                    style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                <h4 style="font-size: 1.1rem; color: var(--text-main);">Health Vault</h4>
+            </div>
+        </div>
+
+        <!-- Real-time Bed Finder -->
+        <section id="bed-finder" style="margin-bottom: 4rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;"><i
+                            class="fa-solid fa-magnifying-glass-location" style="color: var(--danger);"></i> Real-time
+                        Bed Finder</h2>
+                    <p style="color: var(--text-muted);">Locate and reserve an emergency bed near you.</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="dash-card"
+                style="background: rgba(21, 25, 33, 0.4); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <input type="text" id="filter-location" placeholder="ZIP Code or City"
+                        style="background: var(--bg-surface); font-size: 0.95rem;">
+                    <select id="filter-type" style="background: var(--bg-surface); font-size: 0.95rem;">
+                        <option value="">Any Bed Type</option>
+                        <option value="ICU">ICU</option>
+                        <option value="Ventilator">Ventilator</option>
+                        <option value="General Ward">General Ward</option>
+                    </select>
+                    <select id="filter-price" style="background: var(--bg-surface); font-size: 0.95rem;">
+                        <option value="">Any Price</option>
+                        <option value="low">Under ₹200</option>
+                        <option value="high">₹200+</option>
+                    </select>
+                    <button class="btn-primary" onclick="searchBeds()" style="width: 100%;"><i
+                            class="fa-solid fa-magnifying-glass"></i> Search</button>
+                </div>
+            </div>
+
+            <div id="bed-results"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Bed Results populated by JS -->
+                <p style="color: var(--text-muted); padding: 1rem;">Enter search criteria above to find beds.</p>
+            </div>
+        </section>
+
+        <!-- Booking History -->
+        <section id="history" style="margin-bottom: 4rem;">
+            <h2 style="font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;"><i
+                    class="fa-solid fa-clock-rotate-left" style="color: var(--success);"></i> Booking History</h2>
+            <div class="dash-card" style="padding: 0; overflow: hidden;">
+                <div id="history-tabs"
+                    style="display: flex; border-bottom: 1px solid var(--border-color); background: #0F1219;">
+                    <button class="tab-btn active"
+                        style="flex: 1; padding: 1rem; background: transparent; border: none; color: var(--primary-color); font-weight: 600; cursor: pointer; border-bottom: 2px solid var(--primary-color);">Doctor
+                        Appointments</button>
+                    <button class="tab-btn"
+                        style="flex: 1; padding: 1rem; background: transparent; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer;">Bed
+                        Reservations</button>
+                </div>
+
+                <!-- Appointments -->
+                <div id="appointment-history" style="padding: 1.5rem;">
+                    <div id="appointment-list">
+                        <p class="text-muted" style="text-align: center;">Loading appointments...</p>
+                    </div>
+                </div>
+
+                <!-- Bed Reservations (Mocked for now) -->
+                <div id="bed-reservation-history" style="padding: 1.5rem; display: none;">
+                    <div id="reservation-list">
+                        <p class="text-muted" style="text-align: center;">No active bed reservations.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Digital Health Vault -->
+        <section id="health-vault" style="margin-bottom: 2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
+                <div>
+                    <h2
+                        style="font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
+                        <i class="fa-solid fa-vault" style="color: var(--primary-color);"></i> Digital Health Vault
+                    </h2>
+                    <p style="color: var(--text-muted); margin: 0;">Your secure folder for lab results and medical
+                        records.</p>
+                </div>
+                <button class="btn-primary"
+                    style="background:transparent; border:1px solid var(--primary-color); color:var(--primary-color);"
+                    onclick="window.location.href='timeline.html'">
+                    <i class="fa-solid fa-clock-rotate-left"></i> View Full Timeline
+                </button>
+            </div>
+
+            <div class="dash-card" style="padding: 0;">
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="reports-table" style="width: 100%; border: none;">
+                        <thead>
+                            <tr>
+                                <th style="border-top: none; border-left: none;">Document</th>
+                                <th style="border-top: none;">Date Added</th>
+                                <th style="border-top: none;">Source Label</th>
+                                <th style="border-top: none; border-right: none; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 2rem;">Loading vault items...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Profile Modal (Left unchanged or modified to a new link if preferred) -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Manage Profile</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" id="profile-password">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Appointment Modal (Calendar view feel) -->
+    <div class="modal-overlay" id="appointment-modal">
+        <div class="modal-container" style="max-width: 550px;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                <h3 style="font-size: 1.5rem; margin: 0;"><i class="fa-solid fa-calendar-plus"
+                        style="color: var(--success); margin-right: 0.5rem;"></i> Book Appointment</h3>
+                <button class="modal-close" onclick="closeModal('appointment-modal')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 2rem 1.5rem;">
+                <form id="appointment-form" onsubmit="bookAppointment(event)">
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label style="font-size: 1.05rem;">Facility Location</label>
+                        <select id="apt-hospital" required
+                            style="font-size: 1.1rem; padding: 0.8rem; background: var(--bg-surface);">
+                            <option value="">-- Choose a Hospital --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label style="font-size: 1.05rem;">Provider / Specialty</label>
+                        <select id="apt-doctor" required
+                            style="font-size: 1.1rem; padding: 0.8rem; background: var(--bg-surface);">
+                            <option value="">-- Pls Choose Hospital First --</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label style="font-size: 1.05rem;">Select Date</label>
+                        <input type="date" id="apt-date" required
+                            style="font-size: 1.1rem; padding: 0.8rem; background: var(--bg-surface); cursor: pointer;">
+                        <small style="display: block; margin-top: 0.5rem; color: var(--text-muted);"><i
+                                class="fa-solid fa-circle-info"></i> Time slots will be assigned upon hospital
+                            confirmation.</small>
+                    </div>
+                    <button type="submit" class="btn-primary"
+                        style="width: 100%; font-size: 1.2rem; padding: 1rem; border-radius: var(--radius-md);"><i
+                            class="fa-solid fa-check"></i> Request Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('patient');</script>
+    <script src="../js/patient_dashboard.js?v=3.5"></script>
+</body>
+
+</html>

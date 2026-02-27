@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Staff Dashboard | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .module-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+        }
+
+        .module-card i {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card h3 {
+            color: var(--text-main);
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .module-card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Specialized Colors */
+        .card-beds {
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .card-docs {
+            border-top: 4px solid #b388ff;
+        }
+
+        .card-docs i {
+            color: #b388ff;
+        }
+
+        .card-appts {
+            border-top: 4px solid var(--success);
+        }
+
+        .card-appts i {
+            color: var(--success);
+        }
+
+        .card-reservations {
+            border-top: 4px solid var(--danger);
+        }
+
+        .card-reservations i {
+            color: var(--danger);
+        }
+
+        .card-analytics {
+            border-top: 4px solid var(--warning);
+        }
+
+        .card-analytics i {
+            color: var(--warning);
+        }
+
+        .card-emergency {
+            border-top: 4px solid #ff1744;
+            background: rgba(255, 23, 68, 0.05);
+            animation: pulse-border 2s infinite;
+        }
+
+        .card-emergency i {
+            color: #ff1744;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 23, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-hospital-user"></i> Staff Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html" style="color: var(--primary-color);">Dashboard</a></li>
+                <li><a href="manage_beds.html">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('hospital_staff');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+
+        <header style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Hospital Management</h1>
+                <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">Select a module to manage
+                    your facility's resources.</p>
+            </div>
+            <div id="hospital-name" style="font-size: 1.4rem; font-weight: 700; color: var(--primary-color);"></div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+
+            <a href="bed_inventory.html" class="module-card card-beds">
+                <i class="fa-solid fa-bed"></i>
+                <h3>Bed Inventory</h3>
+                <p>Update your facility's bed capacity, real-time availability, and pricing rules.</p>
+            </a>
+
+            <a href="doctor_roster.html" class="module-card card-docs">
+                <i class="fa-solid fa-user-doctor"></i>
+                <h3>Doctor Roster</h3>
+                <p>Register on-staff and consulting doctors alongside their schedules.</p>
+            </a>
+
+            <a href="manage_beds.html" class="module-card card-reservations">
+                <i class="fa-solid fa-bed-pulse"></i>
+                <h3>Bed Reservations</h3>
+                <p>Monitor incoming live ambulance and patient bed reservation requests in real-time.</p>
+            </a>
+
+            <a href="appointment_manager.html" class="module-card card-appts">
+                <i class="fa-solid fa-calendar-check"></i>
+                <h3>Appointment Manager</h3>
+                <p>View today's patient visits, manage the queue, and mark appointments as complete.</p>
+            </a>
+
+            <a href="analytics.html" class="module-card card-analytics">
+                <i class="fa-solid fa-chart-pie"></i>
+                <h3>Analytics</h3>
+                <p>Track mathematical footprints like total patients served and facility peak hours.</p>
+            </a>
+
+            <a href="emergency_hub.html" class="module-card card-emergency">
+                <i class="fa-solid fa-truck-medical"></i>
+                <h3>Emergency Hub</h3>
+                <p>Manage high-priority critical cases, accident victims, and ambulance routings.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Modals (None locally required for hub) -->
+
+    <script>
+        // Minimal fallback for user name display if JS fails to load immediately
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) {
+            document.getElementById('hospital-name').innerText = u.username;
+        }
+    </script>
+    <script src="../js/hospital_dashboard.js?v=4.0"></script>
+</body>
+
+</html>

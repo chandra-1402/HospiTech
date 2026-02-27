@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospitrack | Centralized Healthcare System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-hospital"></i> Hospitrack
+            </a>
+            <ul class="nav-links">
+                <li><a href="#search">Find a Bed</a></li>
+                <li><a href="#how-it-works">How it Works</a></li>
+                <li>
+                    <button id="theme-toggle"
+                        style="background:none; border:none; color:inherit; cursor:pointer; font-size:1.2rem;">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </li>
+                <li><a href="login.html" class="btn-primary" id="login-nav-btn">Login / Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="search">
+        <div class="container">
+            <h1>Emergency: Find a Bed</h1>
+            <p>Real-time hospital inventory and medical facility booking at your fingertips.</p>
+
+            <div class="search-bar" style="margin-bottom: 3rem;">
+                <i class="fa-solid fa-magnifying-glass"
+                    style="color: var(--text-muted); align-self: center; margin-left:1rem;"></i>
+                <input type="text" id="hospital-search" placeholder="Search by hospital name or location..."
+                    oninput="searchHospitals()">
+                <button class="btn-primary" onclick="searchHospitals()">Search</button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem;">Are you in an active
+                    crisis or accident?</p>
+                <a href="emergency.html" class="btn-primary"
+                    style="background: var(--danger); font-size: 1.2rem; padding: 1rem 3rem; box-shadow: 0 0 25px rgba(255, 23, 68, 0.4); border: 2px solid transparent; animation: pulse 2s infinite;">
+                    <i class="fa-solid fa-truck-medical pulse-icon"></i> EMERGENCY SOS
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <span class="stat-number" id="count-hospitals">-</span>
+                    <span class="stat-label">Network Hospitals</span>
+                </div>
+                <!-- Note: The ICU specific aggregate has been removed from backend, so it will show '-' -->
+                <div class="stat-card" style="display:none;">
+                    <span class="stat-number" id="count-icu">-</span>
+                    <span class="stat-label">ICU Beds Free</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="count-general">-</span>
+                    <span class="stat-label">Total Free Beds</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hospital Search Results -->
+    <section class="container" style="padding: 3rem 1.5rem;">
+        <h2 style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Live
+            Availability</h2>
+        <div id="hospital-results">
+            <!-- Dynamically populated via script.js -->
+            <p style="text-align:center; color: var(--text-muted);">Loading hospitals...</p>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="container" id="how-it-works" style="padding: 3rem 1.5rem 5rem;">
+        <h2 style="text-align:center; margin-bottom: 3rem;">A Complete Healthcare Ecosystem</h2>
+        <div class="auth-grid">
+            <div class="role-card" style="text-align:center;">
+                <i class="fa-solid fa-bed-pulse dash-icon"></i>
+                <h3 style="margin-bottom:0.5rem;">For Patients</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Check real-time bed
+                    availability in ICUs or General Wards, book appointments, and access your digital lab reports.</p>
+                <a href="login.html?role=patient" class="btn-primary" style="width:100%;">Patient Portal</a>
+            </div>
+            <div class="role-card" style="text-align:center;">
+                <i class="fa-solid fa-user-doctor dash-icon"></i>
+                <h3 style="margin-bottom:0.5rem;">For Hospitals</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Update your ward inventory,
+                    manage incoming patient bookings, and publish your doctors' on-call schedules.</p>
+                <a href="login.html?role=hospital_staff" class="btn-primary" style="width:100%;">Staff Portal</a>
+            </div>
+            <div class="role-card" style="text-align:center;">
+                <i class="fa-solid fa-microscope dash-icon"></i>
+                <h3 style="margin-bottom:0.5rem;">For Labs</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">Upload test results, X-rays,
+                    and medical documents directly to a patient's secure Hospitrack profile.</p>
+                <a href="login.html?role=lab_tech" class="btn-primary" style="width:100%;">Lab Portal</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+        style="text-align: center; padding: 2rem; background: var(--bg-surface); border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem;">
+        <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>&copy; 2026 Hospitrack. Centralized Healthcare Management System.</div>
+            <div>
+                <a href="login.html?role=admin"
+                    style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; opacity:0.5;">System
+                    Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Hospital Details Modal -->
+    <div class="modal-overlay" id="details-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-hospital-name">Hospital Details</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('details-modal').classList.remove('active')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-content-body">
+                <!-- Dynamically populated via script.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Logic -->
+    <script src="js/script.js"></script>
+    <script>
+        // Check Auth and swap login button text
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchHospitals(); // Initialize Hospital Feed
+
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                const btn = document.getElementById('login-nav-btn');
+                if (btn) {
+                    btn.innerText = 'Go to Dashboard';
+                    btn.href = user.role === 'patient' ? 'patient/index.html' :
+                        user.role === 'hospital_staff' ? 'hospital/index.html' :
+                            user.role === 'lab_tech' ? 'labs/index.html' : 'admin/index.html';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Dashboard | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .module-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+        }
+
+        .module-card i {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card h3 {
+            color: var(--text-main);
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .module-card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Specialized Colors */
+        .card-upload {
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .card-history {
+            border-top: 4px solid var(--success);
+        }
+
+        .card-history i {
+            color: var(--success);
+        }
+
+        .card-inventory {
+            border-top: 4px solid #b388ff;
+        }
+
+        .card-inventory i {
+            color: #b388ff;
+        }
+
+        .card-analytics {
+            border-top: 4px solid var(--warning);
+        }
+
+        .card-analytics i {
+            color: var(--warning);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-microscope"></i> Lab Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html" style="color: var(--primary-color);">Dashboard</a></li>
+                <li><a href="create_order.html">Create Order</a></li>
+                <li><a href="upload.html">Upload Report</a></li>
+                <li><a href="pending.html">Pending Labs</a></li>
+                <li><a href="history.html">Lab History</a></li>
+                <li><a href="#" onclick="openProfileModal()">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('lab_tech');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+
+        <header style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-vial-virus"
+                        style="color: var(--primary-color);"></i> Laboratory Hub</h1>
+                <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Manage diagnostic uploads, view
+                    pending requests, and track lab resources.</p>
+            </div>
+            <div id="lab-tech-name" style="font-size: 1.4rem; font-weight: 700; color: var(--primary-color);">
+                Central Diagnostics
+            </div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+
+            <a href="upload.html" class="module-card card-upload">
+                <i class="fa-solid fa-file-upload"></i>
+                <h3>Upload Reports</h3>
+                <p>Securely transmit scanned diagnostic PDFs directly to a patient's Health Vault via Hospitrack ID.</p>
+            </a>
+
+            <a href="create_order.html" class="module-card card-history">
+                <i class="fa-solid fa-file-signature"></i>
+                <h3>Create Lab Order</h3>
+                <p>Register a new test routing sequence using City/Hospital cascading menus to generate a Pending
+                    tracker.</p>
+            </a>
+
+            <a href="pending.html" class="module-card card-inventory">
+                <i class="fa-solid fa-list-check"></i>
+                <h3>Pending Lab Queue</h3>
+                <p>View the unified dashboard of all active laboratory sequences awaiting PDF upload results.</p>
+            </a>
+
+            <a href="history.html" class="module-card card-analytics">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <h3>Patient Lab History</h3>
+                <p>Access the complete historical archive of all completed lab reports and patient test results.</p>
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- Profile Modal (Shared Logic) -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Manage Profile</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" id="profile-password">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Update Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) {
+            document.getElementById('lab-tech-name').innerText = u.full_name || u.username;
+        }
+    </script>
+    <script src="../js/lab_dashboard.js"></script>
+</body>
+
+</html>

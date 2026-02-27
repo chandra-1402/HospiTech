@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar" style="border-bottom: 2px solid var(--danger);">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-shield-halved"></i> Admin Control</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Live</a></li>
+                <li><a href="#" onclick="openProfileModal()">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('admin');</script>
+
+    <div class="container" style="padding: 2rem; max-width: 1300px; margin: 0 auto;">
+
+        <header style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>City Network Overview</h1>
+                <p style="color: var(--text-muted);">Monitor uptime, capacity, and alerts.</p>
+            </div>
+            <button class="btn-primary" style="background-color: var(--success);" onclick="openHospitalModal()">
+                <i class="fa-solid fa-hospital-wide"></i> Add New Hospital
+            </button>
+        </header>
+
+        <!-- Monitoring Stats -->
+        <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="dash-card">
+                <i class="fa-solid fa-hospital dash-icon"></i>
+                <div class="dash-title" id="stat-active-hospitals">--</div>
+                <div class="dash-desc">Active Hospitals</div>
+            </div>
+            <div class="dash-card">
+                <i class="fa-solid fa-bed dash-icon" style="color: var(--success);"></i>
+                <div class="dash-title" id="stat-occupancy">--%</div>
+                <div class="dash-desc">Occupancy Rate</div>
+            </div>
+            <div class="dash-card">
+                <i class="fa-solid fa-triangle-exclamation dash-icon" style="color: var(--danger);"></i>
+                <div class="dash-title">0</div>
+                <div class="dash-desc">System Alerts</div>
+            </div>
+            <div class="dash-card">
+                <i class="fa-solid fa-chart-line dash-icon" style="color: var(--warning);"></i>
+                <div class="dash-title">Live</div>
+                <div class="dash-desc">Real-time Data</div>
+            </div>
+        </div>
+
+        <!-- System Logs -->
+        <section style="margin-top: 4rem;">
+            <h2>Registered Hospitals</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS Populated -->
+                    <tr>
+                        <td colspan="4" style="text-align:center">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Manage Profile</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" id="profile-password">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Hospital Modal -->
+    <div class="modal-overlay" id="hospital-modal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Add New Hospital</h3>
+                <button class="modal-close" onclick="closeModal('hospital-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="hospital-form" onsubmit="createHospital(event)">
+                    <div class="form-group">
+                        <label>Hospital Name</label>
+                        <input type="text" id="hosp-name" required placeholder="General Hospital">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="hosp-location" required placeholder="Downtown Area">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number</label>
+                        <input type="text" id="hosp-contact" required placeholder="555-0123">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Register Hospital</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="../js/admin_dashboard.js"></script>
+</body>
+
+</html>

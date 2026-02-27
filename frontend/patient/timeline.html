@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Timeline | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .timeline-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background-color: var(--border-color);
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            margin-left: -1px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: transparent;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            right: auto;
+            left: 12px;
+            background-color: var(--bg-main);
+            border: 3px solid var(--primary-color);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+        }
+
+        .timeline-box {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .timeline-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: var(--primary-color);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            background: rgba(0, 229, 255, 0.1);
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .timeline-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-meta {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="text-decoration:none;">
+                <i class="fa-solid fa-bed-pulse"></i> PATIENT PORTAL
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="timeline.html" style="color: var(--primary-color);">Health Timeline</a></li>
+                <li><a href="index.html"
+                        onclick="alert('Please manage your profile from the main Dashboard screen.');">My Profile</a>
+                </li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('patient');</script>
+
+    <div class="container" style="padding: 2.5rem 0;">
+        <header style="margin-bottom: 3rem;">
+            <div style="display:flex; align-items:center; gap: 1rem; position: relative;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 style="color: var(--text-main); margin: 0;"><i class="fa-solid fa-timeline"
+                            style="color: var(--primary-color);"></i> Health Timeline</h1>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.1rem;">A chronological history
+                        of your booked beds, appointments, and encounters.</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="timeline-container" id="timeline-container">
+            <p style="text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i>
+                Fetching medical history...</p>
+        </div>
+    </div>
+
+    <!-- Inject JS logic to map all reservations/appts -->
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        async function buildTimeline() {
+            const container = document.getElementById('timeline-container');
+
+            try {
+                // Fetch both endpoints simultaneously
+                const [resBed, resApt] = await Promise.all([
+                    fetch(`${API_URL}/patient/reservations?patient_id=${user.id}`).then(r => r.json()),
+                    fetch(`${API_URL}/patient/appointments?patient_id=${user.id}`).then(r => r.json())
+                ]);
+
+                let events = [];
+
+                // Process Bed Reservations
+                if (Array.isArray(resBed)) {
+                    resBed.forEach(r => {
+                        events.push({
+                            type: 'bed',
+                            title: `Reserved: ${r.bed_type}`,
+                            location: r.hospital_name,
+                            timestamp: new Date(r.timestamp),
+                            status: r.status,
+                            icon: 'fa-bed-pulse',
+                            color: r.status === 'Arrived' ? 'var(--success)' : r.status === 'Cancelled' ? 'var(--danger)' : 'var(--primary-color)'
+                        });
+                    });
+                }
+
+                // Process Appointments
+                if (Array.isArray(resApt)) {
+                    resApt.forEach(a => {
+                        events.push({
+                            type: 'appointment',
+                            title: `Appt with: ${a.doctor_name}`,
+                            location: a.hospital_name,
+                            timestamp: new Date(a.date),
+                            status: a.status,
+                            icon: 'fa-user-doctor',
+                            color: 'var(--success)',
+                            appointment_no: a.appointment_no,
+                            report_file_path: a.report_file_path
+                        });
+                    });
+                }
+
+                if (events.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding: 4rem; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px dashed var(--border-color);">
+                        <i class="fa-solid fa-book-medical" style="font-size:3rem; color:var(--text-muted); margin-bottom:1rem;"></i>
+                        <p style="color:var(--text-main); font-size:1.1rem; margin:0;">No medical history found</p>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Your timeline is currently empty.</p>
+                    </div>`;
+                    return;
+                }
+
+                // Sort purely descending by Time
+                events.sort((a, b) => b.timestamp - a.timestamp);
+
+                let html = '';
+                events.forEach(ev => {
+                    let extraData = '';
+                    if (ev.type === 'appointment' && ev.appointment_no) {
+                        extraData += `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Appointment No.</span>
+                                <span style="font-family: monospace; color: var(--primary-color); background: rgba(0, 229, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.9rem;">${ev.appointment_no}</span>
+                            </div>`;
+
+                        if (ev.report_file_path) {
+                            extraData += `<a href="../../${ev.report_file_path}" target="_blank" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: var(--success);"><i class="fa-solid fa-file-medical"></i> View Report</a>`;
+                        } else {
+                            extraData += `<span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-clock"></i> Lab pending</span>`;
+                        }
+                        extraData += `</div>`;
+                    }
+
+                    html += `
+                        <div class="timeline-item">
+                            <div class="timeline-box">
+                                <div class="timeline-date">${ev.timestamp.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                                <h3 class="timeline-title">
+                                    <i class="fa-solid ${ev.icon}" style="color: ${ev.color}; width:25px; text-align:center;"></i> 
+                                    ${ev.title}
+                                </h3>
+                                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                                    <p class="timeline-meta"><i class="fa-regular fa-hospital" style="color:var(--text-muted);"></i> ${ev.location}</p>
+                                    <span style="font-size: 0.75rem; background: rgba(255,255,255,0.05); padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); color: ${ev.color}; font-weight: 600; text-transform: uppercase;">${ev.status}</span>
+                                </div>
+                                ${extraData}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="color:var(--danger); text-align:center;">Failed to trace medical history. Check network.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', buildTimeline);
+    </script>
+</body>
+
+</html>

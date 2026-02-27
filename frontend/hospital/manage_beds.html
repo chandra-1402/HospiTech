@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bed Reservations | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .res-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .meta-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .meta-val {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 1.05rem;
+        }
+
+        .tag-urgent {
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .tag-normal {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-hospital-user" style="color: var(--primary-color);"></i> STAFF PORTAL
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="manage_beds.html" style="color: var(--primary-color);">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 2rem;">
+        <header
+            style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap: 1rem;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);"><i
+                        class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <h2 style="margin:0;"><i class="fa-solid fa-bed" style="color: var(--primary-color);"></i> Patient
+                        Bed Reservations</h2>
+                    <p style="margin:0; margin-top:0.3rem; color: var(--text-muted);">Incoming requests from patients
+                        showing urgency, address, and requested bed types.</p>
+                </div>
+            </div>
+        </header>
+
+        <div id="reservations-list">
+            <div style="text-align: center; color: var(--text-muted); padding: 3rem;">Loading reservations...</div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        checkAuth('hospital_staff');
+        const user = JSON.parse(localStorage.getItem('user'));
+        const API_URL = 'http://127.0.0.1:9000/api';
+
+        // We know from DB fixing earlier that the hospital staff is tied to a specific hospital, but let's assume they manage hospital 1 or we need to look it up.
+        // Actually, in hospital_dashboard.js we did `const hospitalId = 1;`
+        const hospitalId = 1;
+
+        async function loadReservations() {
+            try {
+                const res = await fetch(`${API_URL}/hospital/${hospitalId}/reservations?_t=${Date.now()}`);
+                const data = await res.json();
+
+                const list = document.getElementById('reservations-list');
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 3rem; background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 8px;">No current bed reservations found.</div>';
+                    return;
+                }
+
+                list.innerHTML = data.map(r => `
+                    <div class="res-card">
+                        <div>
+                            <div class="meta-label">Patient Name</div>
+                            <div class="meta-val" style="font-size: 1.25rem;"><i class="fa-solid fa-user" style="color: var(--text-muted);"></i> ${r.patient_name}</div>
+                            
+                            <div style="margin-top: 1rem;">
+                                <div class="meta-label">Booking ID</div>
+                                <div class="meta-val" style="font-family: monospace;">#RES-${r.id.toString().padStart(4, '0')}</div>
+                            </div>
+                        </div>
+
+                        <div style="border-left: 1px solid var(--border-color); padding-left: 1.5rem;">
+                            <div style="display: flex; gap: 2rem;">
+                                <div>
+                                    <div class="meta-label">Urgency</div>
+                                    <div class="meta-val ${(r.urgency || '').toLowerCase().includes('high') || (r.urgency || '').toLowerCase().includes('critical') ? 'tag-urgent' : 'tag-normal'}">
+                                        ${r.urgency || 'Normal'}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="meta-label">Requested Bed</div>
+                                    <div class="meta-val" style="color: var(--primary-color);"><i class="fa-solid fa-bed-pulse"></i> ${r.bed_type}</div>
+                                </div>
+                                <div>
+                                    <div class="meta-label">ID / Aadhar</div>
+                                    <div class="meta-val" style="color: var(--text-muted); font-size: 0.95rem; font-family: monospace;">${r.patient_uid || 'N/A'}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 2rem; margin-top: 1.5rem;">
+                                <div style="flex: 2;">
+                                    <div class="meta-label">Patient Address</div>
+                                    <div class="meta-val" style="font-size: 0.95rem; font-weight: normal;"><i class="fa-solid fa-location-dot" style="color: var(--text-muted);"></i> ${r.address || 'Not Provided'}</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div class="meta-label">Contact Email</div>
+                                    <div class="meta-val" style="font-size: 0.95rem; font-weight: normal;"><i class="fa-solid fa-envelope" style="color: var(--text-muted);"></i> ${r.patient_contact || 'N/A'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+                            <div>
+                                <div class="meta-label">Time of Booking</div>
+                                <div class="meta-val" style="font-size: 0.9rem;">${new Date(r.timestamp).toLocaleString()}</div>
+                                <div style="margin-top:0.5rem;"><span style="font-size: 0.8rem; background: ${r.status === 'Reserved' ? 'rgba(0,229,255,0.1)' : r.status === 'Arrived' ? 'rgba(0, 200, 83, 0.1)' : 'rgba(255, 82, 82, 0.1)'}; color: ${r.status === 'Reserved' ? 'var(--primary-color)' : r.status === 'Arrived' ? 'var(--success)' : 'var(--danger)'}; padding: 3px 8px; border-radius: 12px; border: 1px solid ${r.status === 'Reserved' ? 'var(--primary-color)' : r.status === 'Arrived' ? 'var(--success)' : 'var(--danger)'};">${r.status.toUpperCase()}</span></div>
+                            </div>
+                            ${r.status === 'Reserved' ? `
+                            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                                <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: var(--success); border: none;" onclick="updateReservationStatus(${r.id}, 'Arrived')"><i class="fa-solid fa-check"></i> Mark Arrived</button>
+                                <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: var(--danger); border: none;" onclick="updateReservationStatus(${r.id}, 'Cancelled')"><i class="fa-solid fa-xmark"></i> Cancel</button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('reservations-list').innerHTML = '<div style="color: var(--danger); text-align: center; padding: 2rem;">Failed to load reservations. Check backend connection.</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadReservations);
+
+        async function updateReservationStatus(id, newStatus) {
+            if (!confirm(`Are you sure you want to mark this reservation as ${newStatus}?`)) return;
+            try {
+                const res = await fetch(`${API_URL}/hospital/reservations/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    loadReservations();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to update status');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Server Error');
+            }
+        }
+    </script>
+</body>
+
+</html>

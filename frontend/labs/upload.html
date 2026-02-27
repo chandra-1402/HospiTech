@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Report Portal | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <div class="logo"><i class="fa-solid fa-microscope"></i> Lab Portal</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="upload.html" style="color: var(--primary-color);">Upload Report</a></li>
+                <li><a href="#" onclick="openProfileModal()">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('lab_tech');</script>
+
+    <div class="container" style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+
+        <header style="margin-bottom: 2rem; text-align: center;">
+            <h1><i class="fa-solid fa-file-upload"></i> Upload Diagnostic Reports</h1>
+            <p style="color: var(--text-muted);">Securely transmit patient reports to their profile.</p>
+        </header>
+
+        <!-- Upload Card -->
+        <div class="dash-card"
+            style="max-width: 600px; margin: 0 auto; text-align: center; border: 2px dashed var(--border-color);">
+            <i class="fa-solid fa-cloud-arrow-up"
+                style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+
+            <div id="search-section" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-main);">Search Patient</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="text" id="search-hospitrack-id" placeholder="Enter Hospitrack ID (e.g. HT-ABC123)"
+                        style="flex: 1; padding: 0.8rem; font-size: 1rem;">
+                    <button class="btn-primary" type="button" onclick="searchPatient()" style="padding: 0 1.5rem;"><i
+                            class="fa-solid fa-magnifying-glass"></i> Search</button>
+                </div>
+                <p id="search-error" style="color: var(--danger); margin-top: 0.8rem; display: none;"></p>
+            </div>
+
+            <div id="patient-profile"
+                style="display: none; text-align: left; background: rgba(0,229,255,0.05); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--primary-color); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h3 id="profile-name"
+                            style="font-size: 1.4rem; color: var(--text-main); margin-bottom: 0.3rem;">Patient Name</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem;">ID: <span id="profile-id"
+                                style="font-weight: 600; color: var(--primary-color);">HT-XXXXXX</span></p>
+                    </div>
+                    <button type="button" onclick="resetSearch()"
+                        style="background: transparent; border: none; color: var(--danger); cursor: pointer; text-decoration: underline;">Change
+                        Patient</button>
+                </div>
+            </div>
+
+            <form id="upload-form" style="display: none; text-align: left;">
+                <input type="hidden" id="patient-id">
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Appointment No (Optional)</label>
+                    <input type="text" id="appointment-no" placeholder="e.g. APT-1A2B3C4D"
+                        style="width: 100%; padding: 0.8rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Report Type</label>
+                    <select id="report-type" required style="width: 100%; padding: 0.8rem;">
+                        <option value="Blood Test (CBC)">Blood Test (CBC)</option>
+                        <option value="X-Ray">X-Ray</option>
+                        <option value="MRI Scan">MRI Scan</option>
+                        <option value="Urinalysis">Urinalysis</option>
+                        <option value="Covid-19 Test">Covid-19 Test</option>
+                    </select>
+                </div>
+
+                <div class="file-drop-area" id="drop-area"
+                    style="padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 1.5rem; cursor: pointer; border: 1px dashed var(--border-color); transition: all 0.2s; text-align: center;">
+                    <p style="color: var(--text-muted);">Drag & Drop PDF here or <span
+                            style="color: var(--primary-color); font-weight: 600;">Click to Browse</span></p>
+                    <p id="file-name-display" style="margin-top: 0.5rem; font-weight: 600; color: var(--text-main);">
+                    </p>
+                    <input type="file" id="file-input" accept=".pdf" style="display: none;" required
+                        onchange="updateFileList(this.files[0].name)">
+                </div>
+
+                <!-- Fix click on drop area trigger file input -->
+                <script>
+                    document.getElementById('drop-area').addEventListener('click', () => document.getElementById('file-input').click());
+                </script>
+
+                <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;"><i
+                        class="fa-solid fa-upload"></i> Upload to Vault</button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-container" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Manage Profile</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password (leave blank to keep current)</label>
+                        <input type="password" id="profile-password">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateFileList(name) {
+            document.getElementById('file-name-display').innerText = `Selected: ${name}`;
+        }
+    </script>
+    <script src="../js/lab_dashboard.js"></script>
+</body>
+
+</html>

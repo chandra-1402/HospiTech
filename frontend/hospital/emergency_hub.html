@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Hub | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .emergency-header {
+            background: linear-gradient(135deg, rgba(255, 23, 68, 0.2), rgba(0, 0, 0, 0.8));
+            border-bottom: 2px solid #ff1744;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emergency-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 23, 68, 0.05);
+            animation: pulse-bg 2s infinite;
+        }
+
+        @keyframes pulse-bg {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        .alert-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 5px solid #ff1744;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-time {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="text-decoration:none;">
+                <i class="fa-solid fa-hospital-user"></i> Staff Portal
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="manage_beds.html">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('hospital_staff');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+        <div class="emergency-header">
+            <div style="display:flex; align-items:center; gap: 1rem; position: relative; z-index: 1;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 style="color: #ff1744; margin: 0;"><i class="fa-solid fa-truck-medical"></i> Emergency Hub</h1>
+                    <p style="color: var(--text-main); margin-top: 0.5rem; font-size: 1.1rem;">Active Critical Incidents
+                        & Ambulance Approvals</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <!-- Incoming Alerts Column -->
+            <div class="dash-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h3 style="color: var(--text-main); margin: 0;"><i class="fa-solid fa-bell"
+                            style="color: var(--warning);"></i> Active Alerts</h3>
+                    <button class="btn-primary"
+                        style="background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                        onclick="loadAlerts()">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+
+                <div id="alerts-list">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading emergency alerts...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Column -->
+            <div class="dash-card">
+                <h3
+                    style="color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-top: 0; margin-bottom: 1.5rem;">
+                    <i class="fa-solid fa-tower-broadcast" style="color: var(--primary-color);"></i> Broadcast Status
+                </h3>
+
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">If your ER is full or you are diverting
+                    ambulances, switch your hospital status below.</p>
+
+                <div
+                    style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.2rem; color: var(--text-main);">Accepting Emergencies
+                            </h4>
+                            <p style="margin: 0; margin-top: 0.3rem; color: var(--success); font-size: 0.9rem;"
+                                id="er-status-text">Fully Operational</p>
+                        </div>
+
+                        <label class="toggle-switch"
+                            style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                            <input type="checkbox" id="er-status-toggle" checked
+                                style="opacity: 0; width: 0; height: 0;">
+                            <span class="slider"
+                                style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--success); transition: .4s; border-radius: 34px;">
+                                <span
+                                    style="position: absolute; content: ''; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button class="btn-primary"
+                        style="width: 100%; padding: 1rem; font-size: 1.1rem; background: #ff1744;"
+                        onclick="triggerCodeBlue()">
+                        <i class="fa-solid fa-bullhorn"></i> Broadcast "Code Blue" Alert
+                    </button>
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 0.8rem; font-size: 0.8rem;">
+                        Instantly signals all nearby ambulances via the Hospitrack network.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Styles -->
+    <style>
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:not(:checked)+.slider {
+            background-color: var(--danger);
+        }
+
+        input:not(:checked)+.slider>span {
+            transform: translateX(26px);
+        }
+    </style>
+
+    <script src="../js/hospital_dashboard.js?v=4.0"></script>
+    <script>
+        const u = JSON.parse(localStorage.getItem('user'));
+
+        // Setup Toggle
+        document.getElementById('er-status-toggle').addEventListener('change', function (e) {
+            const text = document.getElementById('er-status-text');
+            if (e.target.checked) {
+                text.innerText = "Fully Operational";
+                text.style.color = "var(--success)";
+            } else {
+                text.innerText = "ER DIVERT (Full)";
+                text.style.color = "var(--danger)";
+            }
+        });
+
+        function triggerCodeBlue() {
+            if (confirm("Are you sure you want to broadcast a Code Blue? This will immediately alert the network regarding a critical overload constraints.")) {
+                alert("Code Blue Broadcast Active. Adjacent facilities and EMS notified.");
+            }
+        }
+
+        async function loadAlerts() {
+            const list = document.getElementById('alerts-list');
+            try {
+                // We'll query standard bed reservations but filter for "Critical" ones
+                const res = await fetch(`${API_URL}/hospital/${u.id}/reservations`);
+                const reservations = await res.json();
+
+                const criticals = reservations.filter(r => r.urgency && r.urgency.includes('Critical') && r.status === 'Reserved');
+
+                if (criticals.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);"><i class="fa-regular fa-face-smile" style="font-size: 2rem; margin-bottom: 1rem; color: var(--success); display: block;"></i> No active critical alerts. The ER is quiet.</div>';
+                    return;
+                }
+
+                list.innerHTML = criticals.map(r => `
+                    <div class="alert-card">
+                        <div>
+                            <div style="color: #ff1744; font-weight: bold; margin-bottom: 0.3rem;"><i class="fa-solid fa-triangle-exclamation"></i> CRITICAL INBOUND</div>
+                            <div style="color: var(--text-main); font-size: 1.1rem; margin-bottom: 0.3rem;">${r.patient_name} (${r.patient_uid || 'Unknown ID'})</div>
+                            <div style="color: var(--text-muted); font-size: 0.9rem;">Requested: ${r.bed_type}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="alert-time">${new Date(r.timestamp).toLocaleTimeString()}</div>
+                            <button class="btn-primary" style="margin-top: 1rem; background: var(--success); padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="window.location.href='manage_beds.html'">Go to Reservations</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = '<p style="color: var(--danger);">Failed to load dispatch alerts. Try again.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadAlerts);
+    </script>
+</body>
+
+</html>

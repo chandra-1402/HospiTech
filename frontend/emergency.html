@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency SOS | Hospitrack</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-image: radial-gradient(circle at 50% 10%, rgba(255, 0, 50, 0.1), transparent 50%);
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 50px rgba(255, 23, 68, 0);
+            }
+
+            100% {
+                transform: scale(0.8);
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
+            }
+        }
+
+        .alert-circle {
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 23, 68, 0.1);
+            border: 2px solid var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem auto;
+            animation: pulse-ring 2s infinite;
+        }
+
+        .alert-circle i {
+            font-size: 4rem;
+            color: var(--danger);
+        }
+
+        .facility-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            border-left: 4px solid var(--danger);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" style="border-bottom: 1px solid rgba(255,23,68,0.3);">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="color: var(--danger);">
+                <i class="fa-solid fa-truck-medical"></i> Emergency Gateway
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fa-solid fa-arrow-left"></i> Exit Emergency Mode</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 4rem 1rem; max-width: 800px; text-align: center;">
+
+        <div class="alert-circle">
+            <i class="fa-solid fa-phone-volume"></i>
+        </div>
+
+        <h1
+            style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">
+            Dial 112 Immediately</h1>
+        <p style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 3rem;">If you are experiencing a
+            life-threatening medical emergency, stop. Immediately call National Emergency Services (112 or 911).</p>
+
+        <div
+            style="background: rgba(255, 171, 0, 0.1); border: 1px solid var(--warning); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 3rem; text-align: left;">
+            <h3 style="color: var(--warning); margin-top: 0;"><i class="fa-solid fa-triangle-exclamation"></i> Emergency
+                Broadcast Protocol Active</h3>
+            <p style="margin-bottom: 0; color: var(--text-muted);">Please allow Location Access so we can instantly
+                identify the closest Level 1 Trauma Centers with active Casualty Wards and open Emergency ICU beds.</p>
+        </div>
+
+        <div id="location-ui">
+            <button class="btn-primary" onclick="locateNearestER()" id="locate-btn"
+                style="background: var(--danger); font-size: 1.3rem; padding: 1rem 3rem; width: 100%;">
+                <i class="fa-solid fa-location-crosshairs"></i> Scan for Nearest Emergency Rooms
+            </button>
+            <p id="location-status" style="margin-top: 1rem; color: var(--text-muted);"></p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="er-results" style="margin-top: 3rem; text-align: left; display: none;">
+            <h3 style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;"><i
+                    class="fa-solid fa-truck-fast"></i> Closest Responding Facilities</h3>
+            <div id="er-list" style="display: grid; gap: 1rem;">
+                <!-- Populated via JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="modal-overlay" id="contact-modal">
+        <div class="modal-container" style="max-width: 500px; text-align: center;">
+            <div class="modal-header" style="border-bottom: none;">
+                <button class="modal-close"
+                    onclick="document.getElementById('contact-modal').classList.remove('active')">&times;</button>
+            </div>
+
+            <i class="fa-solid fa-tower-broadcast"
+                style="font-size: 4rem; color: var(--danger); margin-bottom: 1rem;"></i>
+            <h2 id="modal-hosp-name" style="margin-bottom: 0.5rem;">Hospital Name</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">ER Distance: <strong id="modal-distance"
+                    style="color: var(--text-main);">0.0mi</strong> away</p>
+
+            <a href="#" id="modal-call-btn" class="btn-primary"
+                style="display: block; width: 100%; background: var(--success); padding: 1.2rem; font-size: 1.3rem; font-weight: 700; border-radius: 50px; margin-bottom: 1rem;">
+                <i class="fa-solid fa-phone"></i> CALL EMERGENCY WARD
+            </a>
+
+            <a href="#" id="modal-map-btn" target="_blank" class="btn-primary"
+                style="display: block; width: 100%; background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); padding: 1.2rem; font-size: 1.3rem; font-weight: 700; border-radius: 50px;">
+                <i class="fa-solid fa-map-location-dot"></i> OPEN GPS DIRECTIONS
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:9000/api';
+        let allHospitals = [];
+
+        async function fetchAllHospitals() {
+            try {
+                const res = await fetch(`${API_URL}/hospitals`);
+                allHospitals = await res.json();
+            } catch (e) { console.error("Error fetching", e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchAllHospitals);
+
+        function locateNearestER() {
+            const btn = document.getElementById('locate-btn');
+            const status = document.getElementById('location-status');
+
+            btn.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin"></i> Establishing GPS Lock...';
+            btn.disabled = true;
+            status.innerHTML = "Requesting browser location privileges...";
+
+            if (navigator.geolocation) {
+                // We'll mock the Geolocation for realistic demo behavior
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        status.innerHTML = `<span style="color: var(--success);"><i class="fa-solid fa-check-circle"></i> Location Acquired: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}</span>`;
+                        btn.style.display = 'none';
+                        processNearestFacilities();
+                    },
+                    error => {
+                        // If user denies location, fallback to pure database sorting by mock metrics
+                        status.innerHTML = `<span style="color: var(--warning);"><i class="fa-solid fa-triangle-exclamation"></i> GPS Denied. Falling back to City/State routing...</span>`;
+                        btn.style.display = 'none';
+                        processNearestFacilities();
+                    }
+                );
+            } else {
+                status.innerHTML = `<span style="color: var(--danger);">Geolocation is not supported by this browser.</span>`;
+                btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Scan for Nearest Emergency Rooms';
+                btn.disabled = false;
+            }
+        }
+
+        function processNearestFacilities() {
+            // Sort active hospitals by "available ICU beds" or just randomize distances for the demo effect
+            let erReady = [...allHospitals].filter(h => h.total_beds > 0);
+
+            // Add mock "distances"
+            erReady = erReady.map(h => {
+                h.virtualDist = (Math.random() * 8 + 0.5).toFixed(1);
+                return h;
+            }).sort((a, b) => a.virtualDist - b.virtualDist); // Sort closest to furthest
+
+            const list = document.getElementById('er-list');
+
+            list.innerHTML = erReady.slice(0, 5).map(h => `
+                <div class="facility-card">
+                    <div>
+                        <h3 style="margin: 0 0 0.3rem 0; font-size: 1.3rem;">${h.name}</h3>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 0.95rem;">
+                            <i class="fa-solid fa-map-pin"></i> ${h.virtualDist} miles &bull; ${h.location}
+                        </p>
+                        <div style="margin-top: 0.8rem;">
+                             <span style="display:inline-block; font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #fff; background: var(--danger); padding: 3px 8px; border-radius: 4px; margin-right: 0.5rem;"><i class="fa-solid fa-heart-pulse"></i> ER OPEN</span>
+                             ${h.available_beds > 0 ? `<span style="display:inline-block; font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #fff; background: var(--success); padding: 3px 8px; border-radius: 4px;">${h.available_beds} BEDS AVAIL</span>` : '<span style="display:inline-block; font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #fff; background: var(--warning); padding: 3px 8px; border-radius: 4px;">AT CAPACITY</span>'}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn-primary" onclick="openContactModal('${h.name}', '${h.virtualDist}', '${h.location}')" style="background: transparent; border: 1px solid var(--danger); color: var(--danger);">
+                            <i class="fa-solid fa-phone-volume"></i> CONTACT
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('er-results').style.display = 'block';
+        }
+
+        function openContactModal(name, dist, loc) {
+            document.getElementById('modal-hosp-name').innerText = name;
+            document.getElementById('modal-distance').innerText = dist;
+
+            // For demo purposes, the call button launches the tel: protocol with a fake dispatch number
+            document.getElementById('modal-call-btn').href = `tel:+18005550199`;
+
+            // Generate a Google Maps directions query link
+            document.getElementById('modal-map-btn').href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(name + ' ' + loc)}`;
+
+            document.getElementById('contact-modal').classList.add('active');
+        }
+    </script>
+</body>
+
+</html>

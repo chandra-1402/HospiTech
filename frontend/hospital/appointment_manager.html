@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Manager | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="text-decoration:none;">
+                <i class="fa-solid fa-hospital-user"></i> Staff Portal
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="manage_beds.html">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('hospital_staff');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap: 1rem;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);"><i
+                        class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <h1><i class="fa-solid fa-calendar-check" style="color:var(--primary-color);"></i> Appointment
+                        Manager</h1>
+                    <p style="color: var(--text-muted);">Today's patient bookings.</p>
+                </div>
+            </div>
+            <div id="hospital-name" style="font-size: 1.2rem; font-weight: 700; color: var(--primary-color);"></div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="dash-card" style="grid-column: 1 / -1; border-left: 4px solid var(--text-muted);">
+                <div style="overflow-x: auto; margin-top: 1rem;">
+                    <table class="data-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Time / Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointment-list">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) document.getElementById('hospital-name').innerText = u.username;
+    </script>
+    <script src="../js/hospital_dashboard.js?v=3.0"></script>
+</body>
+
+</html>

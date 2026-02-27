@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Roster | Hospitrack</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" style="text-decoration:none;">
+                <i class="fa-solid fa-hospital-user"></i> Staff Portal
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="manage_beds.html">Manage Reservations</a></li>
+                <li><a href="profile.html">Manage Profile</a></li>
+                <li><a href="#" class="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="../js/auth.js"></script>
+    <script>checkAuth('hospital_staff');</script>
+
+    <div class="container" style="padding: 2rem 0;">
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display:flex; align-items:center; gap: 1rem;">
+                <a href="index.html" class="btn-primary"
+                    style="background:transparent; border:1px solid var(--border-color); color:var(--text-main);"><i
+                        class="fa-solid fa-arrow-left"></i></a>
+                <div>
+                    <h1><i class="fa-solid fa-user-doctor" style="color:var(--primary-color);"></i> Doctor Roster</h1>
+                    <p style="color: var(--text-muted);">Manage your staff and consulting doctors.</p>
+                </div>
+            </div>
+            <div id="hospital-name" style="font-size: 1.2rem; font-weight: 700; color: var(--primary-color);"></div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="dash-card" style="grid-column: 1 / -1; border-left: 4px solid var(--primary-color);">
+                <div style="display: flex; gap: 3rem; margin-top: 1rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 350px;">
+                        <h4 style="margin-bottom: 1.5rem; color: var(--text-main); font-size: 1.2rem;">Add New Doctor
+                        </h4>
+                        <form id="doctor-form">
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Doctor Name</label>
+                                    <input type="text" id="doc-name" placeholder="Dr. Jane Doe" required
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Specialization</label>
+                                    <input type="text" id="doc-spec" placeholder="e.g. Cardiologist" required
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                                <input type="hidden" id="doc-id">
+                            </div>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Available Days</label>
+                                    <input type="text" id="doc-days" placeholder="e.g. Mon-Fri" required
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                                <div class="form-group" style="flex: 1; margin: 0;">
+                                    <label style="font-size: 1rem;">Visiting Hours</label>
+                                    <input type="text" id="doc-hours" placeholder="e.g. 9AM - 5PM" required
+                                        style="font-size: 1.1rem; padding: 0.8rem;">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <label style="font-size: 1rem;">Doctor Photo (Optional)</label>
+                                <input type="file" id="doc-image" accept="image/*"
+                                    style="font-size: 1.1rem; padding: 0.8rem; background: var(--bg-surface); border: 1px dashed var(--border-color); width: 100%; border-radius: 8px;">
+                                <input type="hidden" id="doc-existing-image">
+                                <div id="doc-image-preview" style="margin-top: 1rem; max-width: 100px; display: none;">
+                                    <img src=""
+                                        style="width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-color);">
+                                </div>
+                            </div>
+                            <div class="form-group"
+                                style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.5rem;">
+                                <input type="checkbox" id="doc-visiting"
+                                    style="width: 20px; height: 20px; cursor: pointer;">
+                                <label for="doc-visiting"
+                                    style="margin: 0; cursor: pointer; font-size: 1.1rem;">Visiting Consultant?</label>
+                            </div>
+                            <button type="submit" class="btn-primary"
+                                style="width: 100%; font-size: 1.1rem; padding: 1rem;">Add Doctor</button>
+                        </form>
+                    </div>
+
+                    <div style="flex: 2; min-width: 350px;">
+                        <h4
+                            style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--text-main); font-size: 1.2rem;">
+                            On-Call List</h4>
+                        <div id="doctor-list"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <p style="color: var(--text-muted); font-size: 1.1rem;">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const u = JSON.parse(localStorage.getItem('user'));
+        if (u) document.getElementById('hospital-name').innerText = u.username;
+    </script>
+    <script src="../js/hospital_dashboard.js?v=4.0"></script>
+</body>
+
+</html>
