@@ -2,7 +2,7 @@
 
 HospiTech is a robust, full-stack web application designed to unify the healthcare ecosystem. It provides three distinctly tailored web portals connecting **Patients**, **Hospital Staff**, and **Laboratory Technicians** into a single, seamless, synchronized platform.
 
-![HospiTech Dashboard Preview](https://via.placeholder.com/800x400.png?text=HospiTech+Dashboard)
+![HospiTech Dashboard Preview](https://dummyimage.com/800x400/151921/00E5FF.png&text=HospiTech)
 
 ## 🌟 Key Features
 
